@@ -11,15 +11,16 @@ func TestColumnFamilyOpen(t *testing.T) {
 	dir, err := ioutil.TempDir("", "gorocksdb-TestColumnFamilyOpen")
 	require.Nil(t, err)
 
+	// open 12 column families
 	givenNames := []string{
-		"default", "guide",
+		"default",
 		"g1", "g2",
 		"g3", "g4",
 		"g5", "g6",
 		"g7", "g8",
 		"g9", "g10",
 		"g11", "g12",
-		"g13", "g14"}
+	}
 	opts := NewDefaultOptions()
 	opts.SetCreateIfMissingColumnFamilies(true)
 	opts.SetCreateIfMissing(true)
@@ -31,18 +32,30 @@ func TestColumnFamilyOpen(t *testing.T) {
 		opts, opts,
 		opts, opts,
 		opts, opts,
-		opts, opts,
-		opts, opts,
+		opts,
 	})
 	require.Nil(t, err)
-	defer db.Close()
-	require.EqualValues(t, len(cfh), 16)
+	require.EqualValues(t, len(cfh), 13)
 	cfh[0].Destroy()
 	cfh[1].Destroy()
+	db.Close()
 
 	actualNames, err := ListColumnFamilies(opts, dir)
 	require.Nil(t, err)
 	require.EqualValues(t, actualNames, givenNames)
+
+	// open again
+	db, _, err = OpenDbColumnFamilies(opts, dir, givenNames, []*Options{
+		opts, opts,
+		opts, opts,
+		opts, opts,
+		opts, opts,
+		opts, opts,
+		opts, opts,
+		opts,
+	})
+	require.Nil(t, err)
+	db.Close()
 }
 
 func TestColumnFamilyCreateDrop(t *testing.T) {
